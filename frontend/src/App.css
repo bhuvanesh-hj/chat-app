@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300&family=Rubik+Scribble&display=swap');
+
+*{
+    font-family: "Lato";
+}
+
+.App{
+    min-height: 100vh;
+    display: flex;
+    background: linear-gradient(to bottom ,rgb(55, 80, 232) 0%,rgb(55,80,232) 50%, rgb(197,212,253) 50%, rgb(197,212,253) 100%);
+    color: black;
+}
+
+#pic::-webkit-file-upload-button{
+   background-color: rgb(91, 109, 225);
+   border: none;
+   color: aliceblue;
+   padding: 1px 10px 1px 10px;
+   border-radius: 5px;
+   font-family: "Lato";
+}
