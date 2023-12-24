@@ -14,7 +14,9 @@ const registerUser = async (req, res) => {
     const userExists = await User.findOne({ where: { email } });
 
     if (userExists) {
-      res.status(401).json({ message: "User exists please login", success: false });
+      res
+        .status(401)
+        .json({ message: "User exists please login", success: false });
       return;
     }
 
@@ -48,4 +50,46 @@ const registerUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser };
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      res.status(400).json({ message: "Required all fields", success: false });
+      return;
+    }
+
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      res.status(404).json({ message: "User not found", success: false });
+      return;
+    }
+
+    bcrypt.compare(password, user.password, function (err, result) {
+      if (err){
+        throw new Error("Something went wrong!");
+      }
+
+      if (result) {
+        res.status(201).json({
+          message: "login successful ",
+          data: {
+            name: user.name,
+            token: generateToken(user.id),
+            email: user.email,
+            mobileNumber: user.mobileNumber,
+          },
+          success: true,
+        });
+      } else {
+        res.status(401).json({ message: "User not authorized" });
+      }
+    });
+  } catch (error) {
+    console.log(`Error in the login setup: ${error}`);
+    res.status(500).json({ message: error.message, success: false });
+  }
+};
+
+module.exports = { registerUser, loginUser };

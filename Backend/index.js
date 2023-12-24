@@ -12,6 +12,6 @@ app.use(express.json());
 
 app.use("/api/user", userRoutes);
 
-sequelize.sync().then((res) => {
+sequelize.sync({force: false}).then((res) => {
   app.listen(port, () => console.log(`Server is running on the ${port}`));
 });
