@@ -14,7 +14,7 @@ const registerUser = async (req, res) => {
     const userExists = await User.findOne({ where: { email } });
 
     if (userExists) {
-      res.status(401).json({ message: "User exists", success: false });
+      res.status(401).json({ message: "User exists please login", success: false });
       return;
     }
 

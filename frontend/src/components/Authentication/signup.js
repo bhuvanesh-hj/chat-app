@@ -103,7 +103,7 @@ import {
           <Input
             type="tel"
             placeholder="Enter your Mobile number"
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setMobileNumber(e.target.value)}
           />
         </FormControl>
         <FormControl color={"black"} id="password" isRequired>
