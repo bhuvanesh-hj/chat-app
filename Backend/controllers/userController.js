@@ -1,6 +1,8 @@
-const User = require("../models/userModel");
+const Users = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const generateToken = require("../config/generateToken");
+const asyncHandler = require("express-async-handler");
+const { Op } = require("sequelize");
 
 const registerUser = async (req, res) => {
   try {
@@ -11,7 +13,7 @@ const registerUser = async (req, res) => {
       return;
     }
 
-    const userExists = await User.findOne({ where: { email } });
+    const userExists = await Users.findOne({ where: { email } });
 
     if (userExists) {
       res
@@ -28,7 +30,7 @@ const registerUser = async (req, res) => {
           .status(500)
           .json({ message: "Something went wrong", success: false });
 
-      const response = await User.create({
+      const response = await Users.create({
         name,
         email,
         mobileNumber,
@@ -36,6 +38,7 @@ const registerUser = async (req, res) => {
       });
       res.status(200).json({
         data: {
+          id: response.id,
           name: response.name,
           token: generateToken(response.id),
           email: response.email,
@@ -59,7 +62,7 @@ const loginUser = async (req, res) => {
       return;
     }
 
-    const user = await User.findOne({ where: { email } });
+    const user = await Users.findOne({ where: { email } });
 
     if (!user) {
       res.status(404).json({ message: "User not found", success: false });
@@ -67,7 +70,7 @@ const loginUser = async (req, res) => {
     }
 
     bcrypt.compare(password, user.password, function (err, result) {
-      if (err){
+      if (err) {
         throw new Error("Something went wrong!");
       }
 
@@ -75,6 +78,7 @@ const loginUser = async (req, res) => {
         res.status(201).json({
           message: "login successful ",
           data: {
+            id: user.id,
             name: user.name,
             token: generateToken(user.id),
             email: user.email,
@@ -92,4 +96,19 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+const allUsers = asyncHandler(async (req, res) => {
+  const users = await Users.findAll({
+    where: {
+      [Op.and]: [
+        { name: { [Op.like]: `%${req.query.search}%` } },
+        { email: { [Op.like]: `%${req.query.search}%` } },
+        ,
+        { id: { [Op.ne]: req.user.id } },
+      ],
+    },
+  });
+
+  res.send(users);
+});
+
+module.exports = { registerUser, loginUser, allUsers };

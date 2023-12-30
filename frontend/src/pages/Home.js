@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Container,
   Box,
@@ -12,8 +12,16 @@ import {
 
 import Signup from "../components/Authentication/signup";
 import Login from "../components/Authentication/login";
+import { useHistory } from "react-router-dom";
 
 const Home = () => {
+  const history = useHistory();
+
+  useEffect(() => {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+    if (userInfo) history.push("/chats");
+  }, [history]);
   return (
     <Container
       maxW="xl"

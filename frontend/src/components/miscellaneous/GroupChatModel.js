@@ -34,7 +34,7 @@ import {
     const { chats, setChats, user } = ChatState();
   
     const handleSelectedUsers = (userToAdd) => {
-      if (selectedUser.find((user) => user._id === userToAdd._id)) {
+      if (selectedUser.find((user) => user.id === userToAdd.id)) {
         toast({
           title: "User already added",
           status: "warning",
@@ -108,7 +108,7 @@ import {
   
         const { data } = await axios.post("/api/chats/group", {
           name: groupChatName,
-          users: JSON.stringify(selectedUser.map((u) => u._id)),
+          users: JSON.stringify(selectedUser.map((u) => u.id)),
         },config);
   
         setChats([data, ...chats]);
@@ -161,7 +161,7 @@ import {
               </FormControl>
               <FormControl>
                 <Input
-                  placeholder="Add users eg: buvi, hari, etc..."
+                  placeholder="Add users"
                   mb={3}
                   onChange={(e) => handleSearch(e.target.value)}
                 />
@@ -175,7 +175,7 @@ import {
               >
                 {selectedUser?.map((user) => (
                   <UserBadgeItem
-                    key={user._id}
+                    key={user.id}
                     user={user}
                     handleFunction={() => handleDelete(user)}
                   />
@@ -189,7 +189,7 @@ import {
                   ?.slice(0, 4)
                   .map((user) => (
                     <UserListItem
-                      key={user._id}
+                      key={user.id}
                       user={user}
                       handleFunction={() => handleSelectedUsers(user)}
                     />

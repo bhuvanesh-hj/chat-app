@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { ChatState } from "../context/chatProvider";
 import { Box, Button, Stack, Text, useToast } from "@chakra-ui/react";
 import axios from "axios";
-// import ChatLoading from "./ChatLoading";
+import ChatLoading from "./ChatLoading";
 import { getSender } from "../config/ChatLogic";
-// import GroupChatModel from "./miscellaneous/GroupChatModel";
+import GroupChatModel from "./miscellaneous/GroupChatModel";
 
 const MyChats = ({ fetchAgain }) => {
   const [loggedUser, setLoggedUser] = useState();
@@ -13,9 +13,32 @@ const MyChats = ({ fetchAgain }) => {
   const toast = useToast();
 
   const fetchChats = async () => {
-    
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+
+      const { data } = await axios.get("/api/chats", config);
+
+      setChats(data);
+    } catch (error) {
+      toast({
+        title: "Error occurred",
+        description: "failed to load the chats",
+        status: "error",
+        duration: 3000,
+        position: "top-left",
+        isClosable: true,
+      });
+    }
   };
 
+  useEffect(() => {
+    setLoggedUser(JSON.parse(localStorage.getItem("userInfo")));
+    fetchChats();
+  }, [fetchAgain]);
  
 
   return (
@@ -42,11 +65,11 @@ const MyChats = ({ fetchAgain }) => {
         fontSize={{ base: "28px", md: "30px" }}
       >
         My Chats
-        {/* <GroupChatModel>
+        <GroupChatModel>
           <Button display={"flex"} justifyContent={"space-around"} gap={2}>
             <i class="fas fa-users" style={{ fontSize: "25px" }}></i> New Group
           </Button>
-        </GroupChatModel> */}
+        </GroupChatModel>
       </Box>
       <hr style={{ margin: "5px 0 5px 0" }} />
       <Box
@@ -67,7 +90,7 @@ const MyChats = ({ fetchAgain }) => {
                 cursor={"pointer"}
                 bg={selectedChat === chat ? "#38B2AC" : "#E8E8E8"}
                 color={selectedChat === chat ? "white" : "black"}
-                key={chat._id}
+                key={chat.id}
                 px={3}
                 py={2}
                 borderRadius={"lg"}
@@ -81,8 +104,7 @@ const MyChats = ({ fetchAgain }) => {
             ))}
           </Stack>
         ) : (
-          // <ChatLoading />
-          "haii"
+          <ChatLoading />
         )}
       </Box>
     </Box>
