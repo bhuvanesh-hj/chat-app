@@ -25,11 +25,14 @@ const addMessages = asyncHandler(async (req, res) => {
         {
           model: Users,
           as: "sender",
-          attributes: ["name"],
+          attributes: ["name", "email", "id"],
         },
         {
           model: Chats,
-          as: "chat"
+          as: "chat",
+          include: [
+            { model: Users, as: "users", attributes: ["name", "email", "id"] },
+          ],
         },
       ],
     });
@@ -55,11 +58,11 @@ const allMessages = asyncHandler(async (req, res) => {
         {
           model: Users,
           as: "sender",
-          attributes: ["name", "email","id"],
+          attributes: ["name", "email", "id"],
         },
         {
           model: Chats,
-          as: "chat"
+          as: "chat",
         },
       ],
     });

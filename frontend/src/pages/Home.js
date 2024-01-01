@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import {
   Container,
   Box,
-  Text,
   Tabs,
   Tab,
   TabList,

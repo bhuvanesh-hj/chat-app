@@ -14,11 +14,7 @@ const ContextProvider = ({ children }) => {
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
-    setUser(userInfo);
-
-    if (!userInfo) {
-      history.push("/");
-    }
+    useContext ? setUser(userInfo) : history.push("/");
   }, [history]);
 
   return (

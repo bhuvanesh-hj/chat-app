@@ -1,11 +1,8 @@
-import { ViewIcon } from "@chakra-ui/icons";
 import {
   Avatar,
-  AvatarBadge,
   Box,
   Button,
   IconButton,
-  Image,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -70,10 +67,14 @@ const ProfileModal = ({ user, children }) => {
               color={"white"}
               borderColor={"white"}
             >
-              <Text fontSize={"5xl"} >{user.name}</Text>
+              <Text fontSize={"5xl"}>{user.name}</Text>
             </Box>
 
-            <Text display={{ base: "28px", md: "30px" }} fontFamily={"cursive"} color={"whitesmoke"}>
+            <Text
+              display={{ base: "28px", md: "30px" }}
+              fontFamily={"cursive"}
+              color={"whitesmoke"}
+            >
               Email: {user.email}
             </Text>
           </ModalBody>
