@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { ChatState } from "../context/chatProvider";
-import { Box, Button, Stack, Text, useToast } from "@chakra-ui/react";
+import { Avatar, Box, Button, Stack, Text, useToast } from "@chakra-ui/react";
 import axios from "axios";
 import ChatLoading from "./ChatLoading";
-import { getSender } from "../config/ChatLogic";
+import { getSender, getSenderFull } from "../config/ChatLogic";
 import GroupChatModel from "./miscellaneous/GroupChatModel";
 
 const MyChats = ({ fetchAgain }) => {
@@ -39,8 +39,7 @@ const MyChats = ({ fetchAgain }) => {
     setLoggedUser(JSON.parse(localStorage.getItem("userInfo")));
     fetchChats();
   }, [fetchAgain]);
- 
-
+console.log(chats);
   return (
     <Box
       display={{ base: selectedChat ? "none" : "flex", md: "flex" }}
@@ -94,12 +93,51 @@ const MyChats = ({ fetchAgain }) => {
                 px={3}
                 py={2}
                 borderRadius={"lg"}
+                display={"flex"}
+                justifyContent={"flex-start"}
+                alignItems={"center"}
+                gap={3}
               >
-                <Text>
-                  {!chat.isGroupChat
-                    ? getSender(loggedUser, chat.users)
-                    : chat.chatName}
-                </Text>
+                <Avatar
+                  name={
+                    chat.isGroupChat
+                      ? chat.chatName
+                      : getSender(loggedUser, chat.users)
+                  }
+                />
+
+                <Box width={"100%"}>
+                  <Box
+                    display={"flex"}
+                    justifyContent={"space-between"}
+                    alignItems={"center"}
+                  >
+                    <Text fontSize={"larger"} fontWeight={900}>
+                      {!chat.isGroupChat
+                        ? getSender(loggedUser, chat.users)
+                        : chat.chatName}
+                    </Text>
+                    <Text fontSize={"smaller"}>
+                      {chat.updatedAt
+                        .split("T")[0]
+                        .split("-")
+                        .reverse()
+                        .join("/")}
+                    </Text>
+                  </Box>
+                  <Box display={"flex"} justifyContent={"space-between"}>
+                    <Text display={"flex"}>
+                      <Text fontWeight={700}>
+                        {chat.latestMessage
+                          ? chat.latestMessage.sender.id === user.id
+                            ? "you :"
+                            : chat.latestMessage.sender.name + " :"
+                          : ""}
+                      </Text>
+                      <Text>{chat?.latestMessage?.content}</Text>
+                    </Text>
+                  </Box>
+                </Box>
               </Box>
             ))}
           </Stack>

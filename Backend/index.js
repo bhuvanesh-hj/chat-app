@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 require("dotenv").config();
+const path = require("path");
 
 const sequelize = require("./config/db");
 
@@ -26,6 +27,23 @@ app.use(express.json());
 app.use("/api/user", userRoutes);
 app.use("/api/chats", chatsRoutes);
 app.use("/api/message", messageRoutes);
+
+/*---------------------------Deployment-------------------------*/
+const dirname1 = path.resolve();
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(dirname1, "frontend/build")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(dirname1, "frontend", "build", "index.html"));
+  });
+} else {
+  app.get("/", (req, res) => {
+    res.send("API is running..");
+  });
+}
+
+/*---------------------------Deployment-------------------------*/
 
 // Error handlers
 app.use(notFound);
@@ -57,26 +75,28 @@ sequelize.sync({ force: false }).then((res) => {
 
   io.on("connection", (socket) => {
     console.log("Connected to socket.io");
-    socket.on("setup", (userData)=> {
+    socket.on("setup", (userData) => {
       socket.join(userData?.id);
-      socket.emit("connected")
-    })
+      socket.emit("connected");
+    });
     socket.on("join chat", (room) => {
-      socket.join(room)
-      console.log("User joined the room :",room);
-    })
+      socket.join(room);
+      console.log("User joined the room :", room);
+    });
     socket.on("new message", (newMessageReceived) => {
       var chat = newMessageReceived.chat;
 
-      if(!chat.users) return console.log("chat.users not found");
+      if (!chat.users) return console.log("chat.users not found");
 
-      chat.users.forEach(user => {
-        if(user.id === newMessageReceived.sender.id) return;
-        
-        socket.in(user.id).emit("message received", newMessageReceived)
+      chat.users.forEach((user) => {
+        if (user.id === newMessageReceived.sender.id) return;
+
+        socket.in(user.id).emit("message received", newMessageReceived);
       });
-    })
-  })
-
-  
+    });
+    socket.off("setup", () => {
+      console.log("USER DISCONNECTED");
+      socket.leave(userData.id);
+    });
+  });
 });

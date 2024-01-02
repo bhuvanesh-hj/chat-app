@@ -19,7 +19,7 @@ import axios from "axios";
 import "./style.css";
 
 import io from "socket.io-client";
-const ENDPOINT = "http://localhost:4000";
+const ENDPOINT = "http://3.108.252.43:4000";
 var socket, selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
@@ -28,7 +28,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [newMessage, setNewMessage] = useState();
   const [socketConnection, setSocketConnection] = useState(false);
 
-  const { selectedChat, setSelectedChat, user } = ChatState();
+  const { selectedChat, setSelectedChat, user, notification, setNotification } =
+    ChatState();
 
   const toast = useToast();
 
@@ -82,7 +83,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         );
 
         setNewMessage("");
-        console.log(data);
         socket.emit("new message", data);
         setMessages([...messages, data]);
         setFetchAgain(!fetchAgain)
@@ -111,17 +111,15 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         !selectedChatCompare ||
         selectedChatCompare.id !== newMessageReceived.chat.id
       ) {
-        //  give notification
+        if (!notification.includes(newMessageReceived)) {
+          setNotification([newMessageReceived, ...notification]);
+          setFetchAgain(!fetchAgain);
+        }
       } else {
         setMessages([...messages, newMessageReceived]);
-        setFetchAgain(!fetchAgain)
       }
     });
   });
-
-  const typingChat = (e) => {
-    setNewMessage(e.target.value);
-  };
 
   useEffect(() => {
     fetchMessages();
@@ -205,7 +203,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                 rounded={"lg"}
                 placeholder="Type a message"
                 value={newMessage}
-                onChange={typingChat}
+                onChange={(e) => setNewMessage(e.target.value)}
               />
               <Button rounded={"full"} bg={"transparent"} width={20}>
                 <i class="fas fa-paper-plane" style={{ fontSize: "25px" }}></i>

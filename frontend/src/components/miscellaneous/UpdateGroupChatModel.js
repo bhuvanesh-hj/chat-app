@@ -189,6 +189,39 @@ const UpdateGroupChatModel = ({ fetchAgain, setFetchAgain, fetchMessages }) => {
     }
   };
 
+  const handleLeaveGroup = async (userToRemove) => {
+    try {
+      setLoading(true);
+      const config = {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+      const { data } = await axios.put(
+        "/api/chats/group_remove",
+        {
+          chatId: selectedChat.id,
+          userId: userToRemove.id,
+        },
+        config
+      );
+      userToRemove.id === user.id ? setSelectedChat() : setSelectedChat(data);
+      setFetchAgain(!fetchAgain);
+      fetchMessages();
+      setLoading(false);
+    } catch (error) {
+      toast({
+        title: "Error Occurred!",
+        description: error.response.data.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <IconButton
@@ -270,7 +303,11 @@ const UpdateGroupChatModel = ({ fetchAgain, setFetchAgain, fetchMessages }) => {
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="red" mr={3} onClick={() => handleRemove(user)}>
+            <Button
+              colorScheme="red"
+              mr={3}
+              onClick={() => handleLeaveGroup(user)}
+            >
               Leave Group
             </Button>
           </ModalFooter>

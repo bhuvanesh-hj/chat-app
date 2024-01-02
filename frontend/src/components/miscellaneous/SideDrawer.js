@@ -3,6 +3,7 @@ import { Box } from "@chakra-ui/layout";
 import {
   Button,
   Tooltip,
+  Badge,
   Text,
   Menu,
   MenuButton,
@@ -34,7 +35,14 @@ const SideDrawer = () => {
   const [loading, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState();
 
-  const { user, setSelectedChat, chats, setChats } = ChatState();
+  const {
+    user,
+    setSelectedChat,
+    chats,
+    setChats,
+    notification,
+    setNotification,
+  } = ChatState();
   const history = useHistory();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
@@ -138,10 +146,24 @@ const SideDrawer = () => {
         <Box display={"flex"} gap={2}>
           <Menu>
             <MenuButton as={Button} p={4}>
+              {notification.length > 0 && <Badge>{notification.length}</Badge>}
               <BellIcon fontSize={"2xl"} />
             </MenuButton>
             <MenuList>
-              <MenuItem>new message</MenuItem>
+              {!notification.length && <MenuItem>No new messages</MenuItem>}
+              {notification.map((notify) => (
+                <MenuItem
+                  onClick={() => {
+                    setSelectedChat(notify.chat);
+                    setNotification(notification.filter((n) => n != notify));
+                  }}
+                  key={notify.id}
+                >
+                  {notify.chat.isGroupChat
+                    ? `new message from ${notify.chat.chatName}`
+                    : `new message from ${notify.sender.name}`}
+                </MenuItem>
+              ))}
             </MenuList>
           </Menu>
           <Menu>

@@ -103,7 +103,7 @@ const fetchChats = asyncHandler(async (req, res) => {
             {
               model: Users,
               as: "sender",
-              attributes: ["name", "email"],
+              attributes: ["name", "email", "id"],
             },
           ],
         },
@@ -122,7 +122,7 @@ const fetchChats = asyncHandler(async (req, res) => {
   }
 });
 
-const createGroupChat = async (req, res) => {
+const createGroupChat = asyncHandler(async (req, res) => {
   if (!req.body.users || !req.body.name) {
     return res.status(400).send({ message: "Please fill all the fields" });
   }
@@ -130,9 +130,8 @@ const createGroupChat = async (req, res) => {
   const users = JSON.parse(req.body.users);
 
   if (users.length < 2) {
-    return res
-      .status(400)
-      .send("More than 2 users are required to create the group chat");
+    res.status(400);
+    throw new Error("More than 2 users are required to create the group chat");
   }
 
   try {
@@ -160,19 +159,20 @@ const createGroupChat = async (req, res) => {
 
     res.status(200).json(fullGroupChat);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400);
+    throw new Error(error.message);
   }
-};
+});
 
-const renameGroup = async (req, res) => {
+const renameGroup = asyncHandler(async (req, res) => {
   const { chatId, chatName } = req.body;
 
   try {
     const updatedChat = await Chats.findByPk(chatId);
 
     if (!updatedChat) {
-      res.status(404).json({ message: "Chat not found" });
-      return;
+      res.status(404);
+      throw new Error("Chat not found");
     }
 
     updatedChat.chatName = chatName;
@@ -191,26 +191,27 @@ const renameGroup = async (req, res) => {
 
     res.status(200).json(fullUpdatedChat);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500);
+    throw new Error(error.message);
   }
-};
+});
 
-const addToGroup = async (req, res) => {
+const addToGroup = asyncHandler(async (req, res) => {
   const { chatId, userId } = req.body;
 
   try {
     const chat = await Chats.findByPk(chatId);
 
     if (!chat) {
-      res.status(404).json({ message: "Chat not found" });
-      return;
+      res.status(404);
+      throw new Error("Chat not found");
     }
 
     const user = await Users.findByPk(userId);
 
     if (!user) {
-      res.status(404).json({ message: "User not found" });
-      return;
+      res.status(404);
+      throw new Error("User not found");
     }
 
     await chat.addUser(user);
@@ -228,26 +229,27 @@ const addToGroup = async (req, res) => {
 
     res.status(200).json(updatedChat);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500);
+    throw new Error(error.message);
   }
-};
+});
 
-const removeFromGroup = async (req, res) => {
+const removeFromGroup = asyncHandler(async (req, res) => {
   const { chatId, userId } = req.body;
 
   try {
     const chat = await Chats.findByPk(chatId);
 
     if (!chat) {
-      res.status(404).json({ message: "Chat not found" });
-      return;
+      res.status(404);
+      throw new Error("Chat not found");
     }
 
     const user = await Users.findByPk(userId);
 
     if (!user) {
-      res.status(404).json({ message: "User not found" });
-      return;
+      res.status(404);
+      throw new Error("User not found");
     }
 
     await chat.removeUser(user);
@@ -265,9 +267,10 @@ const removeFromGroup = async (req, res) => {
 
     res.status(200).json(updatedChat);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500);
+    throw new Error(error.message);
   }
-};
+});
 
 module.exports = {
   accessChats,

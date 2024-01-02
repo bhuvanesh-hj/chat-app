@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --watch backend/index.js"
+    "start": "node backend/index.js",
+    "server": "node --watch backend/index.js"
   },
   "author": "bhuvanesh-hj",
   "license": "ISC",
