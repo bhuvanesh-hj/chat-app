@@ -14,6 +14,11 @@ const messageRoutes = require("./routes/messageRoutes");
 const Users = require("./models/userModel");
 const Chats = require("./models/chatModel");
 const Messages = require("./models/messagesModel");
+const ArchiveMessages = require("./models/archiveMessagesModel");
+
+// cron job
+const cronServices = require("./services/cron");
+cronServices.job.start();
 
 const { notFound, errorHandler } = require("./middleware/errorHandlers");
 
@@ -29,19 +34,19 @@ app.use("/api/chats", chatsRoutes);
 app.use("/api/message", messageRoutes);
 
 /*---------------------------Deployment-------------------------*/
-const dirname1 = path.resolve();
+// const dirname1 = path.resolve();
 
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(dirname1, "frontend/build")));
+// if (process.env.NODE_ENV === "production") {
+//   app.use(express.static(path.join(dirname1, "frontend/build")));
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(dirname1, "frontend", "build", "index.html"));
-  });
-} else {
-  app.get("/", (req, res) => {
-    res.send("API is running..");
-  });
-}
+//   app.get("*", (req, res) => {
+//     res.sendFile(path.resolve(dirname1, "frontend", "build", "index.html"));
+//   });
+// } else {
+//   app.get("/", (req, res) => {
+//     res.send("API is running..");
+//   });
+// }
 
 /*---------------------------Deployment-------------------------*/
 
@@ -61,10 +66,13 @@ Chats.belongsToMany(Users, { through: "UserChat", as: "users" });
 Messages.belongsTo(Users, { foreignKey: "senderId", as: "sender" });
 Messages.belongsTo(Chats, { foreignKey: "chatId", as: "chat" });
 
+ArchiveMessages.belongsTo(Users, { foreignKey: "senderId", as: "sender" });
+ArchiveMessages.belongsTo(Chats, { foreignKey: "chatId", as: "chat" });
+
 sequelize.sync({ force: false }).then((res) => {
-  const server = app.listen(port, () =>
-    console.log(`Server is running on the ${port}`)
-  );
+  const server = app.listen(port, () => {
+    console.log(`Server is running on the ${port}`);
+  });
 
   const io = require("socket.io")(server, {
     pingTimeOut: 60000,
