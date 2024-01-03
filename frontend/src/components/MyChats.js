@@ -39,7 +39,7 @@ const MyChats = ({ fetchAgain }) => {
     setLoggedUser(JSON.parse(localStorage.getItem("userInfo")));
     fetchChats();
   }, [fetchAgain]);
-console.log(chats);
+  console.log(chats);
   return (
     <Box
       display={{ base: selectedChat ? "none" : "flex", md: "flex" }}
@@ -134,7 +134,9 @@ console.log(chats);
                             : chat.latestMessage.sender.name + " :"
                           : ""}
                       </Text>
-                      <Text>{chat?.latestMessage?.content}</Text>
+                      <Text overflowWrap={"anywhere"}>
+                        {chat?.latestMessage?.content}
+                      </Text>
                     </Text>
                   </Box>
                 </Box>

@@ -6,11 +6,17 @@ import {
   FormControl,
   IconButton,
   Input,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   SkeletonText,
+  Spinner,
+  Switch,
   Text,
   useToast,
 } from "@chakra-ui/react";
-import { ArrowLeftIcon } from "@chakra-ui/icons";
+import { AddIcon, ArrowLeftIcon, MinusIcon } from "@chakra-ui/icons";
 import { getSender, getSenderFull } from "../config/ChatLogic";
 import ProfileModal from "./miscellaneous/ProfileModal";
 import UpdateGroupChatModel from "./miscellaneous/UpdateGroupChatModel";
@@ -19,11 +25,14 @@ import axios from "axios";
 import "./style.css";
 
 import io from "socket.io-client";
-const ENDPOINT = "http://3.108.252.43:4000";
+
+const ENDPOINT = "http://localhost:4000"; //3.108.252.43
 var socket, selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [loading, setLoading] = useState(false);
+  const [image, setImage] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState();
   const [socketConnection, setSocketConnection] = useState(false);
@@ -78,6 +87,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           {
             content: newMessage,
             chatId: selectedChat.id,
+            isImage: image,
           },
           config
         );
@@ -85,7 +95,10 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         setNewMessage("");
         socket.emit("new message", data);
         setMessages([...messages, data]);
-        setFetchAgain(!fetchAgain)
+        setFetchAgain(!fetchAgain);
+        {
+          image && setImage(!image);
+        }
       } catch (error) {
         toast({
           title: "Error occurred",
@@ -96,6 +109,51 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           isClosable: true,
         });
       }
+    }
+  };
+
+  const postDetails = (pics) => {
+    setImageLoading(true);
+    if (pics === undefined) {
+      toast({
+        title: "Please Select an Image!",
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+        position: "top-right",
+      });
+      return;
+    }
+
+    if (pics.type === "image/jpeg" || pics.type === "image/png") {
+      const data = new FormData();
+      data.append("file", pics);
+      data.append("upload_preset", "Chat-App");
+      data.append("cloud_name", "dtuyjsekb");
+      fetch("https://api.cloudinary.com/v1_1/dtuyjsekb/image/upload", {
+        method: "post",
+        body: data,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setNewMessage(data.url.toString());
+          console.log(data.url.toString());
+          setImageLoading(false);
+        })
+        .catch((err) => {
+          console.log(err);
+          setImageLoading(false);
+        });
+    } else {
+      toast({
+        title: "Please Select an Image!",
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+        position: "top-right",
+      });
+      setImageLoading(false);
+      return;
     }
   };
 
@@ -195,20 +253,70 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                 <ScrollableChats messages={messages} />
               </div>
             )}
-            <FormControl display={"flex"} onKeyDown={handleSend} gap={1} mt={3}>
-              <Input
-                variant="filled"
-                bg="#E0E0E0"
-                border={"1px"}
-                rounded={"lg"}
-                placeholder="Type a message"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-              />
-              <Button rounded={"full"} bg={"transparent"} width={20}>
-                <i class="fas fa-paper-plane" style={{ fontSize: "25px" }}></i>
-              </Button>
-            </FormControl>
+            <Box display={"flex"} alignItems={"center"} gap={2}>
+              {/* <Switch
+                onChange={() => setImage(!image)}
+                display={"flex"}
+                mx={2}
+                mt={2}
+                alignItems={"center"}
+              /> */}
+              <Menu>
+                {({ isOpen }) => (
+                  <>
+                    <MenuButton
+                      isActive={isOpen}
+                      as={Button}
+                      mb={-3}
+                      bg={"#805AD5"}
+                      color={"white"}
+                      _hover={{ bg: "#E9D8FD", color: "black" }}
+                    >
+                      {isOpen ? <MinusIcon /> : <AddIcon />}
+                    </MenuButton>
+                    <MenuList>
+                      <MenuItem onClick={() => setImage(false)}>Text</MenuItem>
+                      <MenuItem onClick={() => setImage(true)}>Image</MenuItem>
+                      <MenuItem>Video</MenuItem>
+                    </MenuList>
+                  </>
+                )}
+              </Menu>
+              {image ? (
+                <FormControl
+                  width={"100%"}
+                  onKeyDown={handleSend}
+                  mt={3}
+                  display={"flex"}
+                  alignItems={"center"}
+                >
+                  <Input
+                    variant="filled"
+                    bg="#E0E0E0"
+                    id="pic"
+                    border={"1px"}
+                    rounded={"lg"}
+                    placeholder="Select an image"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => postDetails(e.target.files[0])}
+                  />
+                  {imageLoading && <Spinner mx={2} />}
+                </FormControl>
+              ) : (
+                <FormControl width={"100%"} onKeyDown={handleSend} mt={3}>
+                  <Input
+                    variant="filled"
+                    bg="#E0E0E0"
+                    border={"1px"}
+                    rounded={"lg"}
+                    placeholder="Type a message"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                  />
+                </FormControl>
+              )}
+            </Box>
           </Box>
         </>
       ) : (

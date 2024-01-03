@@ -7,7 +7,7 @@ import {
   isSameSenderMargin,
   isSameUser,
 } from "../config/ChatLogic";
-import { Avatar, Tooltip } from "@chakra-ui/react";
+import { Avatar, Tooltip, Image } from "@chakra-ui/react";
 
 const ScrollableChats = ({ messages }) => {
   const { user } = ChatState();
@@ -41,7 +41,11 @@ const ScrollableChats = ({ messages }) => {
                 marginTop: isSameUser(messages, m, i) ? 3 : 10,
               }}
             >
-              {m.content}
+              {m.isImage ? (
+                <Image boxSize="250px" rounded={"xl"} objectFit="cover" src={m.content} alt="Sent some picture" />
+              ) : (
+                m.content
+              )}
             </span>
           </div>
         ))}

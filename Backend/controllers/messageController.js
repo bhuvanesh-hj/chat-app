@@ -6,7 +6,7 @@ const Chats = require("../models/chatModel");
 const Users = require("../models/userModel");
 
 const addMessages = asyncHandler(async (req, res) => {
-  const { content, chatId } = req.body;
+  const { content, chatId, isImage } = req.body;
 
   if (!content || !chatId) {
     res.status(400);
@@ -17,6 +17,7 @@ const addMessages = asyncHandler(async (req, res) => {
     const newMessage = await Messages.create({
       senderId: req.user.id,
       content,
+      isImage,
       chatId,
     });
 
